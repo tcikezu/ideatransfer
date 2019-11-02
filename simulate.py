@@ -7,12 +7,12 @@ import transfer
 from community import *
 
 def simulate(gamma, T):
-    X = community(40,5)
+    X = community(10,3)
     print(X.getIdeas())
 
     for t in range(T):
-        transfer.deterministicMerge(X, gamma)
-        #transfer.probabilisticMerge(X,gamma)
+        #transfer.deterministicMerge(X, gamma)
+        transfer.probabilisticMerge(X,gamma)
 
     print(X.getIdeas())
 simulate(0.1, 1000)
