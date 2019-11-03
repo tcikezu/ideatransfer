@@ -86,6 +86,7 @@ class community():
             self.allIdeas[i] = self.members[i].ideas
             self.allPositions[i] = self.members[i].position
             self.allThresholds[i] = self.members[i].threshold
+        self.allIdeas = normalize(self.allIdeas)
     
     def updateMembers(self):
         for i in range(self.numberMembers):
