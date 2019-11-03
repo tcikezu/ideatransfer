@@ -1,0 +1,6 @@
+probabilistic -- gamma = 0.005, T = 240, fps = 40, X = community(300,3)
+
+deterministic 
+1: gamma = 0.001, T = 80, fps = 40, X = community(300,3)
+2: gamma = 0.005, T = 240, fps = 40, X = community(300,3)
+
