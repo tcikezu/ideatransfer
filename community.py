@@ -13,16 +13,26 @@ Hence, no adjacency or graph network is being modeled here.
 """
 
 from util import *
+import matplotlib.pyplot as plt
+import mpl_toolkits.mplot3d.axes3d as p3
 
 ######################################################################
 
 DEFAULT_IDEA_SIZE = 3
-DEFAULT_COMMUNITY_SIZE = 10 
+DEFAULT_COMMUNITY_SIZE = 300
 
 
 """ class idea(): 
 This class implements idea objects, things that represent some opinion about the environment
-or world. Ideas agree or disagree, which is why we also export an agreement method."""
+or world. Ideas agree or disagree, which is why we also export an agreement method.
+
+Something that is a bit confusing, is that in the community implementation, I normalize all ideas 
+by their euclidean magnitude. I also do the same after each time step in transfer.py 
+
+This keeps all the points on a sphere -- and has a possibly bad effect of making everyone's ideas, 
+appear on average, more close to the outside than in middle. Actually, that is kinda bad considering
+one of my conclusions is that people polarize. However some normalization step is necessary for the
+transfer, since the ideas will grow without bound otherwise. """
 class idea():
     def __init__(self, numberIdeas = None):
         if numberIdeas is None:
@@ -48,7 +58,9 @@ class member(idea):
         super().__init__(numberIdeas)
         self.positionBound = 1
         self.position = np.random.uniform(-self.positionBound, self.positionBound, 2)
-        self.threshold = np.random.rand() 
+        self.threshold = np.random.rand()
+        self.radius = np.random.rand()
+        self.gregariousness = np.random.rand()
 
     def getPositionDistance(self, member):
         return euclideanDistance(self.position, member.position)
@@ -75,8 +87,10 @@ class community():
         
         self.members = [member(self.numberIdeas) for i in range(self.numberMembers)]
         self.allIdeas = np.ndarray((self.numberMembers, self.numberIdeas))
-        self.allThresholds = np.ndarray((self.numberMembers))
+        self.allThresholds = np.ndarray(self.numberMembers)
         self.allPositions = np.ndarray((self.numberMembers, len(self.members[0].position))) 
+        self.allRadii = np.ndarray(self.numberMembers)
+        self.allGregariousness = np.ndarray(self.numberMembers)
         self.defineParameters()
         self.distanceMatrix = self.createDistanceMatrix()
         self.agreementMatrix = self.createAgreementMatrix()
@@ -86,6 +100,8 @@ class community():
             self.allIdeas[i] = self.members[i].ideas
             self.allPositions[i] = self.members[i].position
             self.allThresholds[i] = self.members[i].threshold
+            self.allRadii[i] = self.members[i].radius
+            self.allGregariousness[i] = self.members[i].gregariousness
         self.allIdeas = normalize(self.allIdeas)
     
     def updateMembers(self):
@@ -122,3 +138,13 @@ class community():
 
     def createAgreementMatrix(self):
         return cosineMatrix(self.allIdeas)
+    
+    # Just a function to look at first 3 and 2 components of member ideas
+    def plotIdeas(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(111,projection='3d')
+        ax.scatter3D(self.allIdeas[:,0], self.allIdeas[:,1], self.allIdeas[:,2])
+        plt.show()
+
+        plt.scatter(self.allIdeas[:,0], self.allIdeas[:,1])
+        plt.show()
