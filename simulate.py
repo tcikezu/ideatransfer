@@ -17,7 +17,10 @@ date_time = datetime.now().strftime("%m_%d_%Y_%H:%M:%S")
 """ simulate returns an animated 3d scatter plot of the community allIdeas object.
 The input parameters are the community, the interaction coefficient gamma, 
 and also fn, a string file-name which defaults to date and time."""
-def simulate(X=community(300,3), gamma = 0.005, T = 80,fn=date_time):
+def simulate(X=None, gamma = 0.005, T = 80,fn=date_time):
+    # seems like the same community is used again and again if I do not specify None case below.
+    if X is None:
+        X = community(300,3)
     fps = 40
     
     # Data to store X.allIdeas, to then make animation
@@ -30,12 +33,13 @@ def simulate(X=community(300,3), gamma = 0.005, T = 80,fn=date_time):
         dataX[t,:] = X.allIdeas[:,0]
         dataY[t,:] = X.allIdeas[:,1]
         dataZ[t,:] = X.allIdeas[:,2]
-        transfer.deterministicMerge(X, gamma)
-        #transfer.probabilisticMerge(X, gamma)
+        #transfer.deterministicMerge(X, gamma)
+        transfer.probabilisticMerge(X, gamma)
 
     # Plot results
     fig = plt.figure()
     ax = fig.add_subplot(111,projection='3d')
+    ax.scatter3D(dataX[0], dataY[0], dataZ[0])
 
     #animation function for animation.FuncAnimation
     def update(ifrm,dataX,dataY,dataZ):
@@ -49,5 +53,5 @@ def simulate(X=community(300,3), gamma = 0.005, T = 80,fn=date_time):
          
     ani = animation.FuncAnimation(fig, update, T, fargs=(dataX,dataY,dataZ),interval = T/fps )
     ani.save(fn+'.gif',writer='imagemagick',fps=fps)
-
+    
     plt.show()

@@ -20,9 +20,12 @@ def distanceMatrix(X):
 
 # Compute the cosine matrix for idea data X, which is arranged as n x d.
 # This is pretty analogous to the distance matrix. Product matrix sounds a bit
-# confusing though. I'm unsure. 
+# confusing though. I'm unsure. Basically, element (i,j), is Xi* Xj / (||Xi|| ||Xj||)
 def cosineMatrix(X):
     return X @ X.T / (np.sum(X**2, 1)**0.5 * np.sum(X**2, 1)[:, np.newaxis]**0.5)
 
 def normalize(X):
     return np.sum(X**2,1)[:,np.newaxis]**-0.5 * X
+
+def L1normalize(X):
+    return 1/np.sum(np.abs(X),1)[:,np.newaxis] * X
