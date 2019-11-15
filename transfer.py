@@ -9,16 +9,23 @@ Note: this is the numpy version!
 
 from util import *
 
+# function probAgreement:
+# returns an n x n matrix that calculates the agreement between any pair of members.
+def probAgreement(community):
+    return 1*(community.agreementMatrix > community.allThresholds) - 1*(community.agreementMatrix < -community.allThresholds) - np.eye(community.numberMembers)
+
+# function probInteraction: 
+# returns (A > r) * (g > rand), which is an n x n matrix whose columns correspond to member_i, interacting with all other members j. 
+def probInteraction(community):
+    return (community.distanceMatrix < community.allRadii) * (community.allGregariousness >  np.random.random(community.numberMembers))
+
 # deterministically merge everyone's ideas with everybody else, each time step.
 # For this, we create the indicator, @param agreementMatrix - allThresholds > 0 -- and let this value
 # assume 1 if > 0, and -1 if not.
 # From this we also subtract diagonal agreements because we don't want people to reinforce their own ideas
-# every time step. Finally we normalize.
+# every time step.
 def deterministicMerge(community, gamma):
-    agreement = 1*(community.agreementMatrix > community.allThresholds) - 1*(community.agreementMatrix < -community.allThresholds) - np.eye(community.numberMembers)
-    #agreement = agreement * community.agreementMatrix # This might be better -- but tbh, it doesn't matter much
-
-    community.allIdeas = (1 - gamma)*community.allIdeas + gamma * agreement @ community.allIdeas 
+    community.allideas += gamma*probAgreement(community) @ community.allIdeas
     community.allIdeas = normalize(community.allIdeas)
 
 # Probabilistically merge everyone's ideas with a subset of the community each time step.
@@ -30,15 +37,8 @@ def deterministicMerge(community, gamma):
 # So on average ... a member will interact with somewhere less than half of all the other members. 
 # So these two constraints combine multiplicatively for the idea update / transfer. And again, we normalize at end of each step.
 def probabilisticMerge(community, gamma):
-    N = community.numberMembers
-    
-    # chanceEncounter -- (A > r) * (g > rand) returns an n x n matrix, whose columns correspond to member_i, interacting with
-    # all other members j. 
-    # chanceAgreement -- returns an n x n matrix that calculates the agreement between any pair of members.
-    chanceEncounter = (community.distanceMatrix < community.allRadii) * (community.allGregariousness >  np.random.random(N))
-    agreement = 1*(community.agreementMatrix > community.allThresholds) - 1*(community.agreementMatrix < -community.allThresholds) - np.eye(community.numberMembers)
 
-    ideaTransfer = agreement * chanceEncounter
+    ideaTransfer = probAgreement(community) * probInteraction(community)
     #community.allIdeas = (1-gamma)*community.allIdeas + gamma * ideaTransfer @ community.allIdeas
     community.allIdeas += gamma*ideaTransfer @ community.allIdeas
     community.allIdeas = normalize(community.allIdeas)

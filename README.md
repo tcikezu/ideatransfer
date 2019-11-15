@@ -1,13 +1,7 @@
 # ideatransfer
-Deterministic and probabilistic spreading of merging of ideas.
-Ideas will merge if beyond threshold, ideas will drift apart if not.
-If probabilistic, then chance of two ideas merging depends on member position distance.
-Otherwise, everybody interacts with everyone else at every time step.
-
-For the probabilistic simulation, used gamma = 0.008, T = 200
-For the deterministic simulation, used gamma = 0.001, T = 200
-
-For both, numberMembers = 300, numberIdeas = 3 (to see in 3d plot)
+To do: 
+Need to create update rule idea transferring
+Need to implement an RL agent.
 
 Read up on 
 - information maximimzation
