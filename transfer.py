@@ -39,10 +39,14 @@ def deterministicMerge(community, gamma):
 def probabilisticMerge(community, gamma):
 
     ideaTransfer = probAgreement(community) * probInteraction(community)
-    #community.allIdeas = (1-gamma)*community.allIdeas + gamma * ideaTransfer @ community.allIdeas
-    community.allIdeas += gamma*ideaTransfer @ community.allIdeas
-    community.allIdeas = normalize(community.allIdeas)
     
+    community.communityIdeaDistribution = (1 - gamma)*community.communityIdeaDistribution + \
+        gamma * ideaTransfer @ community.communityIdeaDistribution * \
+        np.random.random((community.numberMembers, community.numberIdeas, community.domainSize))
+    # generate allIdeas here, again. 
+    # the below code probably doesn't work. but it's gonna be something like this
+    community.allIdeas = community.allIdeas[np.random.randint(community.allIdeas.shape[0],1)]
+
 
 def positionUpdate(community, chanceEncounter):
     """ few ideas could work here:
