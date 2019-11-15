@@ -13,36 +13,49 @@ Hence, no adjacency or graph network is being modeled here.
 """
 
 from util import *
-import matplotlib.pyplot as plt
-import mpl_toolkits.mplot3d.axes3d as p3
 
 ######################################################################
 
-DEFAULT_IDEA_SIZE = 3
+DEFAULT_IDEA_SIZE = 100
+DEFAULT_DOMAIN_SIZE = 4
 DEFAULT_COMMUNITY_SIZE = 300
+
 
 
 """ class idea(): 
 This class implements idea objects, things that represent some opinion about the environment
 or world. Ideas agree or disagree, which is why we also export an agreement method.
-
-Something that is a bit confusing, is that in the community implementation, I normalize all ideas 
-by their euclidean magnitude. I also do the same after each time step in transfer.py 
-
-This keeps all the points on a sphere -- and has a possibly bad effect of making everyone's ideas, 
-appear on average, more close to the outside than in middle. Actually, that is kinda bad considering
-one of my conclusions is that people polarize. However some normalization step is necessary for the
-transfer, since the ideas will grow without bound otherwise. """
+"""
 class idea():
-    def __init__(self, numberIdeas = None):
+    def __init__(self, numberIdeas = None, domainSize = None):
         if numberIdeas is None:
             self.numberIdeas = DEFAULT_IDEA_SIZE
         else:
             self.numberIdeas = numberIdeas
-        self.ideas = np.random.uniform(-1,1,self.numberIdeas)
 
-    def getIdeaDistance(self, idea):
-        return euclideanDistance(self.ideas, idea)
+        if domainSize is None:
+            self.domainSize = DEFAULT_DOMAIN_SIZE
+        else:
+            self.domainSize = domainSize
+        
+        self.Lambda = 1
+        self.ideaDomain = np.arange(self.domainSize)
+        self.ideaDistribution = np.ndarray((self.numberIdeas,self.domainSize))
+        self.generateDistribution()
+        self.ideas = np.ndarray(self.numberIdeas)
+        self.sampleIdeas()
+
+    def generateDistribution(self):
+        for i in range(self.numberIdeas):
+            self.ideaDistribution[i] = np.ones(self.domainSize)*self.Lambda
+            self.ideaDistribution[i] = self.ideaDistribution[i] / sum(self.ideaDistribution[i])
+
+    def sampleIdeas(self):
+        for i in range(self.numberIdeas):
+            self.ideas[i] = np.random.choice(self.ideaDomain, p=self.ideaDistribution[i])
+
+    #def getIdeaDistance(self, idea):
+        #return euclideanDistance(self.ideas, idea)
 
     def agreement(self, ideas):
         if self.ideas == ideas:
@@ -54,7 +67,7 @@ class idea():
     having ideas, the member is something that has opinions, and we can measure its
     agreement with other members with the idea - inherited agreement method."""
 class member(idea):
-    def __init__(self, numberIdeas=None):
+    def __init__(self, numberIdeas=None, domainSize = None):
         super().__init__(numberIdeas)
         self.positionBound = 1
         self.position = np.random.uniform(-self.positionBound, self.positionBound, 2)
@@ -74,7 +87,7 @@ interact by exchanging ideas. The idea exchange is actually implemented in trans
 Here we implement the storing of every member's ideas, thresholds, and positions into
 ndarrays. We also implement a fast distance-matrix calculation for positions."""
 class community():
-    def __init__(self, numberMembers = None, numberIdeas = None):
+    def __init__(self, numberMembers = None, numberIdeas = None, domainSize = None):
         if numberMembers is None:
             self.numberMembers = DEFAULT_COMMUNITY_SIZE
         else:
@@ -84,8 +97,13 @@ class community():
             self.numberIdeas = DEFAULT_IDEA_SIZE
         else:
             self.numberIdeas = numberIdeas
+
+        if domainSize is None:
+            self.domainSize = DEFAULT_DOMAIN_SIZE
+        else:
+            self.domainSize = domainSize
         
-        self.members = [member(self.numberIdeas) for i in range(self.numberMembers)]
+        self.members = [member(self.numberIdeas,self.domainSize) for i in range(self.numberMembers)]
         self.allIdeas = np.ndarray((self.numberMembers, self.numberIdeas))
         self.allThresholds = np.ndarray(self.numberMembers)
         self.allPositions = np.ndarray((self.numberMembers, len(self.members[0].position))) 
@@ -102,7 +120,6 @@ class community():
             self.allThresholds[i] = self.members[i].threshold
             self.allRadii[i] = self.members[i].radius
             self.allGregariousness[i] = self.members[i].gregariousness
-        #self.allIdeas = normalize(self.allIdeas)
     
     def updateMembers(self):
         for i in range(self.numberMembers):
@@ -131,20 +148,11 @@ class community():
         return self.distanceMatrix[index, index2]
 
     def agreement(self, index1, index2):
-        return cosine(self.allIdeas[index1], self.allIdeas[index2]) 
+        return cosine(self.allIdeas[index1], self.allIdeas[index2])
            
     def createDistanceMatrix(self):
         return distanceMatrix(self.allPositions)
 
     def createAgreementMatrix(self):
-        return cosineMatrix(self.allIdeas)
+        return cosineMatrix(self.allIdeas) - np.eye(self.numberMembers)
     
-    # Just a function to look at first 3 and 2 components of member ideas
-    def plotIdeas(self):
-        fig = plt.figure()
-        ax = fig.add_subplot(111,projection='3d')
-        ax.scatter3D(self.allIdeas[:,0], self.allIdeas[:,1], self.allIdeas[:,2])
-        plt.show()
-
-        plt.scatter(self.allIdeas[:,0], self.allIdeas[:,1])
-        plt.show()
