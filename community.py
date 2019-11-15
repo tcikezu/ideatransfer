@@ -105,16 +105,18 @@ class community():
         
         self.members = [member(self.numberIdeas,self.domainSize) for i in range(self.numberMembers)]
         self.allIdeas = np.ndarray((self.numberMembers, self.numberIdeas))
+        self.communityIdeaDistribution = np.ndarray((self.numberMembers, self.numberIdeas, self.domainSize))
         self.allThresholds = np.ndarray(self.numberMembers)
         self.allPositions = np.ndarray((self.numberMembers, len(self.members[0].position))) 
         self.allRadii = np.ndarray(self.numberMembers)
         self.allGregariousness = np.ndarray(self.numberMembers)
-        self.defineParameters()
+        self.updateCommunity()
         self.distanceMatrix = self.createDistanceMatrix()
         self.agreementMatrix = self.createAgreementMatrix()
 
-    def defineParameters(self):
+    def updateCommunity(self):
         for i in range(self.numberMembers):
+            self.communityIdeaDistribution[i] = self.members[i].ideaDistribution
             self.allIdeas[i] = self.members[i].ideas
             self.allPositions[i] = self.members[i].position
             self.allThresholds[i] = self.members[i].threshold
@@ -154,5 +156,5 @@ class community():
         return distanceMatrix(self.allPositions)
 
     def createAgreementMatrix(self):
-        return cosineMatrix(self.allIdeas) - np.eye(self.numberMembers)
+        return cosineMatrix(self.allIdeas)
     
