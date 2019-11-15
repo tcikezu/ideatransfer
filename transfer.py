@@ -18,7 +18,7 @@ def deterministicMerge(community, gamma):
     agreement = 1*(community.agreementMatrix > community.allThresholds) - 1*(community.agreementMatrix < -community.allThresholds) - np.eye(community.numberMembers)
     #agreement = agreement * community.agreementMatrix # This might be better -- but tbh, it doesn't matter much
 
-    community.allIdeas += gamma * agreement @ community.allIdeas
+    community.allIdeas = (1 - gamma)*community.allIdeas + gamma * agreement @ community.allIdeas 
     community.allIdeas = normalize(community.allIdeas)
 
 # Probabilistically merge everyone's ideas with a subset of the community each time step.
@@ -34,13 +34,15 @@ def probabilisticMerge(community, gamma):
     
     # chanceEncounter -- (A > r) * (g > rand) returns an n x n matrix, whose columns correspond to member_i, interacting with
     # all other members j. 
-    # chanceAgreement -- 
+    # chanceAgreement -- returns an n x n matrix that calculates the agreement between any pair of members.
     chanceEncounter = (community.distanceMatrix < community.allRadii) * (community.allGregariousness >  np.random.random(N))
     agreement = 1*(community.agreementMatrix > community.allThresholds) - 1*(community.agreementMatrix < -community.allThresholds) - np.eye(community.numberMembers)
 
     ideaTransfer = agreement * chanceEncounter
-    community.allIdeas += gamma * ideaTransfer @ community.allIdeas
+    #community.allIdeas = (1-gamma)*community.allIdeas + gamma * ideaTransfer @ community.allIdeas
+    community.allIdeas += gamma*ideaTransfer @ community.allIdeas
     community.allIdeas = normalize(community.allIdeas)
+    
 
 def positionUpdate(community, chanceEncounter):
     """ few ideas could work here:
@@ -52,4 +54,4 @@ def positionUpdate(community, chanceEncounter):
     Personally I like the last one the best. But it will probably be very noisy? Don't think positions will equilibriate.
     """
 
-    community.allPositions =  
+    #community.allPositions = 

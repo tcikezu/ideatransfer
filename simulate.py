@@ -33,25 +33,28 @@ def simulate(X=None, gamma = 0.005, T = 80,fn=date_time):
         dataX[t,:] = X.allIdeas[:,0]
         dataY[t,:] = X.allIdeas[:,1]
         dataZ[t,:] = X.allIdeas[:,2]
-        #transfer.deterministicMerge(X, gamma)
-        transfer.probabilisticMerge(X, gamma)
+        transfer.deterministicMerge(X, gamma)
+        #transfer.probabilisticMerge(X, gamma)
 
     # Plot results
     fig = plt.figure()
     ax = fig.add_subplot(111,projection='3d')
     ax.scatter3D(dataX[0], dataY[0], dataZ[0])
 
+    axTicks = np.linspace(-1,1,4)
+    
     #animation function for animation.FuncAnimation
     def update(ifrm,dataX,dataY,dataZ):
         ax.clear()
         plt.autoscale(False)
-        ax.set_xticks([-1.0,-0.5,0.0,0.5,1])
-        ax.set_yticks([-1.0,-0.5,0.0,0.5,1])
-        ax.set_zticks([-1.0,-0.5,0.0,0.5,1])
+        ax.set_xticks(axTicks)
+        ax.set_yticks(axTicks)
+        ax.set_zticks(axTicks)
         ax.scatter3D(dataX[ifrm], dataY[ifrm], dataZ[ifrm])
         ax.set_xlabel("frame: %d" % (ifrm))
-         
+    
     ani = animation.FuncAnimation(fig, update, T, fargs=(dataX,dataY,dataZ),interval = T/fps )
     ani.save(fn+'.gif',writer='imagemagick',fps=fps)
     
     plt.show()
+    
