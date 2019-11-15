@@ -102,7 +102,7 @@ class community():
             self.allThresholds[i] = self.members[i].threshold
             self.allRadii[i] = self.members[i].radius
             self.allGregariousness[i] = self.members[i].gregariousness
-        self.allIdeas = normalize(self.allIdeas)
+        #self.allIdeas = normalize(self.allIdeas)
     
     def updateMembers(self):
         for i in range(self.numberMembers):
