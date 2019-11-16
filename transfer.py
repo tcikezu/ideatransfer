@@ -24,6 +24,7 @@ def probInteraction(community):
 
 def ideaUpdate(ideaTransfer, community):
     product = np.tensordot(ideaTransfer, community.ideaDistribution, axes=1)
+    #product = product*(np.random.random(product.shape)<=0.5)
     return normalizeDistribution(product)
 
 # deterministically merge everyone's ideas with everybody else, each time step.
@@ -31,7 +32,7 @@ def ideaUpdate(ideaTransfer, community):
 # assume 1 if > 0, and -1 if not.
 # From this we also subtract diagonal agreements because we don't want people to reinforce their own ideas
 # every time step.
-def deterministicMerge(community, gamma):
+def deterministicMerge(community, gamma, t):
     community.ideaDistribution = normalizeDistribution((1-gamma)*community.ideaDistribution + gamma*ideaUpdate(probAgreement(community), community))
     community.resampleIdeas()
 
@@ -42,10 +43,18 @@ def deterministicMerge(community, gamma):
 # 0 and standard deviation equal to 2/3 * positionBound. (Quick calculation tells me that 2/3 * positionBound
 # is in fact the average distance between two points inside the square bounded by (+/- positionBound, +/- positionBound).)
 # So on average ... a member will interact with somewhere less than half of all the other members. 
-def probabilisticMerge(community, gamma):
+def probabilisticMerge(community, gamma, t):
     ideaTransfer = probAgreement(community) * probInteraction(community)
-    community.ideaDistribution = normalizeDistribution((1 - gamma)*community.ideaDistribution + gamma*ideaUpdate(ideaTransfer, community))
-    community.resampleIdeas()
+    community.ideaDistribution = (1 - gamma)*community.ideaDistribution + gamma*ideaUpdate(ideaTransfer, community)
+    if t%5 == 0: 
+        community.resampleIdeas()
+
+
+    # to do: right now, transferring all ideas over is making things difficult.
+    # what i need to do instead is only transfer idea count seen. 
+    # not sure what else can explain the convergence to uniform distributions. 
+
+    # Besides this i need to formulate everything as state-based
 
 def positionUpdate(community, chanceEncounter):
     """ few ideas could work here:
