@@ -51,9 +51,12 @@ def deterministicMerge(community, gamma, t):
 def probabilisticMerge(community, gamma, t):
     ideaTransfer = probAgreement(community) * probInteraction(community)
     community.ideaDistribution = normalizeDistribution((1 - gamma)*community.ideaDistribution + gamma*ideaUpdate(ideaTransfer, community))
-    if t%5 == 0: 
-        community.resampleIdeas()
-        positionUpdate(community, ideaTransfer,0.1)
+
+    # originally I needed to undersample, so that people could see same ideas multiple times
+    # to converge better. I am unsure if I need this. 
+    #if t%5 == 0: 
+    community.resampleIdeas()
+    positionUpdate(community, ideaTransfer,0.1)
 
 def positionUpdate(community,ideaTransfer,beta):
     """ few ideas could work here:
@@ -72,6 +75,8 @@ def positionUpdate(community,ideaTransfer,beta):
     # if all goes well, the net movement is on average, 0, so people should on average
     # stay in roughly the same space as where they began -- ie, in the unit square.
     # we'll see if that is truly the case. 
+    # the reason why a diffusion term is needed, is kinda similar to why we need heat 
+    # to make chemicals react -- people need to find each other to interact
     deltaAttract = (ideaTransfer>0).reshape(community.numberMembers,community.numberMembers,1)*community.differenceMatrix
     deltaRepel = (ideaTransfer < 0).reshape(community.numberMembers,community.numberMembers,1)*community.differenceMatrix
     community.allPositions += (2*np.random.rand(community.numberMembers,2)-1)*beta + beta*deltaAttract.sum(axis=1) - beta*deltaRepel.sum(axis=1)
