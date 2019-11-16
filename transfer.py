@@ -36,10 +36,10 @@ def ideaUpdate(ideaTransfer, community):
 # every time step.
 def deterministicMerge(community, gamma, t):
     #community.ideaDistribution = softMaxDistribution((1-gamma)*community.ideaDistribution + gamma*ideaUpdate(probAgreement(community), community))
-
-    community.ideaDistribution = normalizeDistribution((1-gamma)*community.ideaDistribution + gamma*ideaUpdate(probAgreement(community), community))
-
+    ideaTransfer = probAgreement(community)
+    community.ideaDistribution = normalizeDistribution((1-gamma)*community.ideaDistribution + gamma*ideaUpdate(ideaTransfer, community))
     community.resampleIdeas()
+    positionUpdate(community, ideaTransfer)
 
 # Probabilistically merge everyone's ideas with a subset of the community each time step.
 # For this, again we create the indicator, @param agreementMatrix - allThresholds > 0 which assumes +1 
@@ -56,9 +56,9 @@ def probabilisticMerge(community, gamma, t):
     # to converge better. I am unsure if I need this. 
     #if t%5 == 0: 
     community.resampleIdeas()
-    positionUpdate(community, ideaTransfer,0.01)
+    positionUpdate(community, ideaTransfer)
 
-def positionUpdate(community,ideaTransfer,beta):
+def positionUpdate(community,ideaTransfer):
     """ few ideas could work here:
     1: update position to that of best idea + noise
     2: update position to that of worst idea + noise
@@ -79,7 +79,7 @@ def positionUpdate(community,ideaTransfer,beta):
     # to make chemicals react -- people need to find each other to interact
     deltaAttract = (ideaTransfer>0).reshape(community.numberMembers,community.numberMembers,1)*community.differenceMatrix
     deltaRepel = (ideaTransfer < 0).reshape(community.numberMembers,community.numberMembers,1)*community.differenceMatrix
-    community.allPositions += (2*np.random.rand(community.numberMembers,2)-1)*beta + beta*deltaAttract.sum(axis=1) - beta*deltaRepel.sum(axis=1)
+    community.allPositions += ((2*np.random.rand(community.numberMembers,2)-1) + deltaAttract.sum(axis=1) - deltaRepel.sum(axis=1)) * community.allVelocities.reshape(community.numberMembers,1)
 
     community.distanceMatrix = community.createDistanceMatrix()
     community.differenceMatrix = community.createDifferenceMatrix()

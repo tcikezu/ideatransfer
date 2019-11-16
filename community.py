@@ -73,6 +73,7 @@ class member(idea):
         self.threshold = np.random.rand()
         self.radius = np.random.rand()
         self.gregariousness = np.random.rand()
+        self.velocity = np.random.rand()/10  # this is dependent on the positionbounds 
 
     def getPositionDistance(self, member):
         return euclideanDistance(self.position, member.position)
@@ -108,6 +109,7 @@ class community():
         self.allPositions = np.ndarray((self.numberMembers, len(self.members[0].position))) 
         self.allRadii = np.ndarray(self.numberMembers)
         self.allGregariousness = np.ndarray(self.numberMembers)
+        self.allVelocities = np.ndarray(self.numberMembers)
         self.updateCommunity()
         self.resampleIdeas()
         self.distanceMatrix = self.createDistanceMatrix()
@@ -123,6 +125,7 @@ class community():
             self.allThresholds[i] = self.members[i].threshold
             self.allRadii[i] = self.members[i].radius
             self.allGregariousness[i] = self.members[i].gregariousness
+            self.allVelocities[i] = self.members[i].velocity
     
     def updateMembers(self):
         for i in range(self.numberMembers):
