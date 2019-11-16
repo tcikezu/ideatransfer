@@ -160,7 +160,7 @@ class community():
         return cosineMatrix(self.allIdeas)
     
     def resampleIdeas(self):
-        self.allIdeas = np.random.normal(self.domain[resampleDistribution(self.ideaDistribution)],2)
+        self.allIdeas = np.random.normal(self.domain[resampleDistribution(self.ideaDistribution)],1)
 
     def createDifferenceMatrix(self):
         P1 = self.allPositions.reshape(self.numberMembers,1,2).repeat(self.numberMembers,axis=1)

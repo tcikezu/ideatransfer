@@ -56,7 +56,7 @@ def probabilisticMerge(community, gamma, t):
     # to converge better. I am unsure if I need this. 
     #if t%5 == 0: 
     community.resampleIdeas()
-    positionUpdate(community, ideaTransfer,0.1)
+    positionUpdate(community, ideaTransfer,0.01)
 
 def positionUpdate(community,ideaTransfer,beta):
     """ few ideas could work here:
