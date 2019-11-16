@@ -109,14 +109,16 @@ class community():
         self.allRadii = np.ndarray(self.numberMembers)
         self.allGregariousness = np.ndarray(self.numberMembers)
         self.updateCommunity()
-        #self.ideaDistribution = normalizeDistribution(self.ideaDistribution)
+        self.resampleIdeas()
         self.distanceMatrix = self.createDistanceMatrix()
         self.agreementMatrix = self.createAgreementMatrix()
+        self.differenceMatrix = self.createDifferenceMatrix()
+        #self.ideaDistribution = normalizeDistribution(self.ideaDistribution)
 
     def updateCommunity(self):
         for i in range(self.numberMembers):
             self.ideaDistribution[i] = self.members[i].ideaDistribution
-            self.allIdeas[i] = self.members[i].ideas
+            #self.allIdeas[i] = self.members[i].ideas
             self.allPositions[i] = self.members[i].position
             self.allThresholds[i] = self.members[i].threshold
             self.allRadii[i] = self.members[i].radius
@@ -158,4 +160,9 @@ class community():
         return cosineMatrix(self.allIdeas)
     
     def resampleIdeas(self):
-        self.allIdeas = self.domain[resampleDistribution(self.ideaDistribution)]
+        self.allIdeas = np.random.normal(self.domain[resampleDistribution(self.ideaDistribution)],2)
+
+    def createDifferenceMatrix(self):
+        P1 = self.allPositions.reshape(self.numberMembers,1,2).repeat(self.numberMembers,axis=1)
+        P2 = np.transpose(self.allPositions.reshape(self.numberMembers,1,2).repeat(self.numberMembers,1),axes=[1,0,2])
+        return P2-P1

@@ -1,6 +1,7 @@
 # ideatransfer
 To do: 
-Need to create update rule idea transferring
+Position subplots
+
 Need to implement an RL agent.
 
 Read up on 
