@@ -24,8 +24,23 @@ def distanceMatrix(X):
 def cosineMatrix(X):
     return X @ X.T / (np.sum(X**2, 1)**0.5 * np.sum(X**2, 1)[:, np.newaxis]**0.5)
 
-def normalize(X):
+def L2normalize(X):
     return np.sum(X**2,1)[:,np.newaxis]**-0.5 * X
 
 def L1normalize(X):
     return 1/np.sum(np.abs(X),1)[:,np.newaxis] * X
+
+def normalizeDistribution(X):
+    X = X*(X > 0) + 0.001
+    return X / np.sum(X,axis=2).reshape(X.shape[0], X.shape[1],1)
+
+# Given an n x m x d matrix, n corresponding to number members,
+# m corresponding to # ideas, 
+# d corresponding to domain size,
+# and where the matrix represents the joint probability distribution over all
+# members and their ideas, return an n x m matrix, which samples from the joint distribution.
+def resampleDistribution(X):
+    normalizeDistribution(X)
+    c = np.cumsum(X,axis=2)
+    u = np.random.rand(X.shape[0], X.shape[1], X.shape[2])
+    return (u<c).argmax(axis=2)

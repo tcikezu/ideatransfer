@@ -39,7 +39,7 @@ class idea():
             self.domainSize = domainSize
         
         self.Lambda = 1
-        self.ideaDomain = np.arange(self.domainSize)
+        self.ideaDomain = np.arange(1,self.domainSize+1)
         self.ideaDistribution = np.ndarray((self.numberIdeas,self.domainSize))
         self.generateDistribution()
         self.ideas = np.ndarray(self.numberIdeas)
@@ -47,15 +47,14 @@ class idea():
 
     def generateDistribution(self):
         for i in range(self.numberIdeas):
-            self.ideaDistribution[i] = np.ones(self.domainSize)*self.Lambda
-            self.ideaDistribution[i] = self.ideaDistribution[i] / sum(self.ideaDistribution[i])
-
+            self.ideaDistribution[i] = np.ones(self.domainSize)*self.Lambda + np.random.randint(0,10,size=self.domainSize)
+            #self.ideaDistribution[i] = self.ideaDistribution[i] / sum(self.ideaDistribution[i])
     def sampleIdeas(self):
         for i in range(self.numberIdeas):
-            self.ideas[i] = np.random.choice(self.ideaDomain, p=self.ideaDistribution[i])
+            self.ideas[i] = np.random.choice(self.ideaDomain, p=self.ideaDistribution[i]/sum(self.ideaDistribution[i]))
 
-    #def getIdeaDistance(self, idea):
-        #return euclideanDistance(self.ideas, idea)
+    def getIdeaDistance(self, idea):
+        return euclideanDistance(self.ideas, idea)
 
     def agreement(self, ideas):
         if self.ideas == ideas:
@@ -68,12 +67,13 @@ class idea():
     agreement with other members with the idea - inherited agreement method."""
 class member(idea):
     def __init__(self, numberIdeas=None, domainSize = None):
-        super().__init__(numberIdeas)
+        super().__init__(numberIdeas, domainSize)
         self.positionBound = 1
         self.position = np.random.uniform(-self.positionBound, self.positionBound, 2)
         self.threshold = np.random.rand()
         self.radius = np.random.rand()
         self.gregariousness = np.random.rand()
+        self.domain = self.ideaDomain.reshape(1,self.domainSize).repeat(self.numberIdeas,axis=0)
 
     def getPositionDistance(self, member):
         return euclideanDistance(self.position, member.position)
@@ -92,12 +92,10 @@ class community():
             self.numberMembers = DEFAULT_COMMUNITY_SIZE
         else:
             self.numberMembers = numberMembers
-        
         if numberIdeas is None:
             self.numberIdeas = DEFAULT_IDEA_SIZE
         else:
             self.numberIdeas = numberIdeas
-
         if domainSize is None:
             self.domainSize = DEFAULT_DOMAIN_SIZE
         else:
@@ -105,18 +103,21 @@ class community():
         
         self.members = [member(self.numberIdeas,self.domainSize) for i in range(self.numberMembers)]
         self.allIdeas = np.ndarray((self.numberMembers, self.numberIdeas))
-        self.communityIdeaDistribution = np.ndarray((self.numberMembers, self.numberIdeas, self.domainSize))
+        self.ideaDistribution = np.ndarray((self.numberMembers, self.numberIdeas, self.domainSize))
+        self.domain = np.ndarray((self.numberMembers, self.numberIdeas, self.domainSize))
         self.allThresholds = np.ndarray(self.numberMembers)
         self.allPositions = np.ndarray((self.numberMembers, len(self.members[0].position))) 
         self.allRadii = np.ndarray(self.numberMembers)
         self.allGregariousness = np.ndarray(self.numberMembers)
         self.updateCommunity()
+        self.ideaDistribution = normalizeDistribution(self.ideaDistribution)
         self.distanceMatrix = self.createDistanceMatrix()
         self.agreementMatrix = self.createAgreementMatrix()
 
     def updateCommunity(self):
         for i in range(self.numberMembers):
-            self.communityIdeaDistribution[i] = self.members[i].ideaDistribution
+            self.domain[i] = self.members[i].domain
+            self.ideaDistribution[i] = self.members[i].ideaDistribution
             self.allIdeas[i] = self.members[i].ideas
             self.allPositions[i] = self.members[i].position
             self.allThresholds[i] = self.members[i].threshold
@@ -158,3 +159,5 @@ class community():
     def createAgreementMatrix(self):
         return cosineMatrix(self.allIdeas)
     
+    def resampleIdeas(self):
+        self.allIdeas = resampleDistribution(self.ideaDistribution)
