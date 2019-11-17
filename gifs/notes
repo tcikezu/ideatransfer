@@ -1,27 +1,19 @@
-probabilistic 1 and 2 used:
-community(numberMembers=100,numberIdeas=3,domainSize=10)
-gamma=0.05, T = 200, 
-
-deterministic used the same parameters.
-
-In the deterministic case, members fly away from each other. 
-It seems like, constantly having to interact with everybody means they receive momentum
-at all times, to move away from one another. Interesting -- so it is expected.
-
-Probabilistic case, there are spikes in the probability distributions over idea values. This is good! It means they're learning biases.
+There are spikes in the probability distributions over idea values. This is good! It means they're learning biases.
 
 Something I should note, is that because I am re-normalizing the probability densities every single iteration, what is happening is that previous beliefs are being long-forgotten.    
 
 
 gifs with ideas, positions, and 1st idea distribution of member 0:
 
-1 -- member 0 is caught in a tangle with just one other member. dist converges to uniform
-2 -- member 0 is caught in a cluster. dist converges to 1 spike
-3 -- ""
-4 -- like 2, but the spike is not as peaked
-5 -- initially bimodal, but one idea is bit more dominant than rest
-7 -- this one is far away from the rest -- I wonder if its threshold is low, because its distribution converges to uniform. Not being in cluster seems to predict low bias.
-8 -- like 2, is caught in cluster, ideas seem frozen
-9 -- this one is really cool -- member 0 is far away from everyone else, but is very biased
-10 -- this one is also really cool -- someone starts off somewhat far apart, but eventually becomes very un-biased. Maybe gamma should be diminishing with time.
-11 -- somewhat uniform,  
+1 -- somewhat uniform, perhaps too far away from cluster?
+2 -- also somewhat uniform until near the end of simulation, dist seems to freeze
+3 -- relatively fast convergence, but this one's radius is very small
+4 -- this one is pretty cool, it momentarily forgets all its beliefs, but quickly regains them once it rejoins a cluster
+5 -- again a really damn small radius; ideas hardly change; i guess it's a consequence of not interacting with others much
+6 -- oh interesting, this member is *extremely* fast, and idea dist became biased pretty quickly
+7 -- same as 5. small radius
+8 -- can see a nearly bimodal distribution over ideas. big radius seems to help
+9 -- this one is also really cool. member 0 trails off to the bottom right with some neighbors. This shows the effect of having few neighbors; the ideas seem to have much higher variance.
+10 -- this seems to be a classic case of idea distribution converging to cluster distribution
+11 -- interesting -- member 0 idea idst pretty stable with what appears to be <10 neighbors
+12 -- another classic case of idea death // not enough in the cluster to keep ideas alive   
