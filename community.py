@@ -16,9 +16,9 @@ from util import *
 
 ######################################################################
 
-DEFAULT_IDEA_SIZE = 100
-DEFAULT_DOMAIN_SIZE = 4
-DEFAULT_COMMUNITY_SIZE = 300
+DEFAULT_IDEA_SIZE = 3 
+DEFAULT_DOMAIN_SIZE = 10 
+DEFAULT_COMMUNITY_SIZE = 100
 
 
 
@@ -32,13 +32,12 @@ class idea():
             self.numberIdeas = DEFAULT_IDEA_SIZE
         else:
             self.numberIdeas = numberIdeas
-
         if domainSize is None:
             self.domainSize = DEFAULT_DOMAIN_SIZE
         else:
             self.domainSize = domainSize
-        
-        self.Lambda = 1
+       
+        self.beta = np.random.normal(7, 2, self.numberIdeas)
         self.ideaDomain = np.arange(-self.domainSize, self.domainSize+1)
         self.ideaDistribution = np.ndarray((self.numberIdeas,self.domainSize*2+1))
         self.generateDistribution()
@@ -48,10 +47,12 @@ class idea():
     def generateDistribution(self):
         for i in range(self.numberIdeas):
             self.ideaDistribution[i] = np.random.rand(self.domainSize*2+1)
+            self.ideaDistribution[i] = self.ideaDistribution[i]/sum(self.ideaDistribution[i])
+            #self.ideaDistribution[i] = np.exp(self.ideaDistribution[i]*self.beta[i]) / sum(np.exp(self.ideaDistribution[i]*self.beta[i]))
     
     def sampleIdeas(self):
         for i in range(self.numberIdeas):
-            self.ideas[i] = np.random.choice(self.ideaDomain, p=self.ideaDistribution[i]/sum(self.ideaDistribution[i]))
+            self.ideas[i] = np.random.choice(self.ideaDomain, p = self.ideaDistribution[i])
 
     def getIdeaDistance(self, idea):
         return euclideanDistance(self.ideas, idea)
@@ -70,10 +71,12 @@ class member(idea):
         super().__init__(numberIdeas, domainSize)
         self.positionBound = 1
         self.position = np.random.uniform(-self.positionBound, self.positionBound, 2)
-        self.threshold = np.random.rand()
-        self.radius = np.random.rand()
-        self.gregariousness = np.random.rand()
-        self.velocity = np.random.rand()/10  # this is dependent on the positionbounds 
+        self.threshold = np.random.normal(0.5,0.1)
+        self.radius = (np.random.normal(0.4,0.1)**2 + np.random.normal(0.4,0.1)**2)**0.5
+        self.gregariousness = np.random.normal(0.5,0.1)
+        #self.velocity = (np.random.normal(0.2,0.1)**2 + np.random.normal(0.3,0.1)**2)**0.5 # this is dependent on the positionbounds
+        self.velocity = np.random.lognormal(-3,0.5)
+        self.gamma = np.random.lognormal(-2.5, 0.1)
 
     def getPositionDistance(self, member):
         return euclideanDistance(self.position, member.position)
@@ -109,8 +112,11 @@ class community():
         self.allPositions = np.ndarray((self.numberMembers, len(self.members[0].position))) 
         self.allRadii = np.ndarray(self.numberMembers)
         self.allGregariousness = np.ndarray(self.numberMembers)
-        self.allVelocities = np.ndarray(self.numberMembers)
+        self.allVelocities = np.ndarray((self.numberMembers,2))
+        self.allGamma = np.ndarray(self.numberMembers) # gamma: for ideaUpdate (see transfer.py)
+        self.allBeta = np.ndarray((self.numberMembers,self.numberIdeas)) # beta:  for softmax idea distribution
         self.updateCommunity()
+       
         self.resampleIdeas()
         self.distanceMatrix = self.createDistanceMatrix()
         self.agreementMatrix = self.createAgreementMatrix()
@@ -120,19 +126,17 @@ class community():
     def updateCommunity(self):
         for i in range(self.numberMembers):
             self.ideaDistribution[i] = self.members[i].ideaDistribution
-            #self.allIdeas[i] = self.members[i].ideas
             self.allPositions[i] = self.members[i].position
             self.allThresholds[i] = self.members[i].threshold
             self.allRadii[i] = self.members[i].radius
             self.allGregariousness[i] = self.members[i].gregariousness
             self.allVelocities[i] = self.members[i].velocity
+            self.allGamma[i] = self.members[i].gamma
+            self.allBeta[i] = self.members[i].beta
+        
+        self.allBeta = self.allBeta[:,np.newaxis].reshape(self.numberMembers, self.numberIdeas, 1)
+        self.allGamma = self.allGamma[:,np.newaxis].reshape(self.numberMembers, 1, 1)
     
-    def updateMembers(self):
-        for i in range(self.numberMembers):
-            self.members[i].ideas = self.allIdeas[i]
-            self.members[i].threshold = self.allThresholds[i]
-            self.members[i].position = self.allPositions[i]
-
     def getPositionBounds(self):
         return self.members[0].positionBound
 
@@ -163,7 +167,9 @@ class community():
         return cosineMatrix(self.allIdeas)
     
     def resampleIdeas(self):
-        self.allIdeas = np.random.normal(self.domain[resampleDistribution(self.ideaDistribution)],1)
+        self.allIdeas = np.random.normal(self.domain[resampleDistribution(self.ideaDistribution)],1 - self.allThresholds[:,np.newaxis].reshape(self.numberMembers,1))
+
+        #self.allIdeas = np.random.normal(self.domain[resampleDistribution(self.ideaDistribution,self.allBeta)],1 - self.allThresholds[:,np.newaxis].reshape(self.numberMembers,1))
 
     def createDifferenceMatrix(self):
         P1 = self.allPositions.reshape(self.numberMembers,1,2).repeat(self.numberMembers,axis=1)
