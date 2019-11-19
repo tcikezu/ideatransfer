@@ -34,8 +34,8 @@ def normalizeDistribution(X):
     X = X*(X > 0) + 0.000001
     return X / np.sum(X,axis=2).reshape(X.shape[0], X.shape[1],1)
 
-def softMaxDistribution(X):
-    return np.exp(X)/np.sum(np.exp(X),axis=2).reshape(X.shape[0], X.shape[1],1)
+def softMaxDistribution(X, beta):
+    return np.exp(X*beta)/np.sum(np.exp(X*beta),axis=2).reshape(X.shape[0], X.shape[1],1)
 
 # Function: Resample Distribution
 # ---------------------------------
@@ -46,9 +46,11 @@ def softMaxDistribution(X):
 # and where the matrix represents the joint probability distribution over all
 # members and their ideas, return an n x m matrix, which returns indices from 1-d, 
 # that are samples of the domain.
-def resampleDistribution(probDensity):
-    #prob = softMaxDistribution(probDensity)
-    prob = normalizeDistribution(probDensity)
+def resampleDistribution(probDensity, beta = None):
+    if beta is None:
+        prob = normalizeDistribution(probDensity)
+    else:
+        prob = softMaxDistribution(probDensity, beta)
     c = np.cumsum(prob,axis=2)
     u = np.random.rand(prob.shape[0], prob.shape[1], 1)
     return (u<c).argmax(axis=2)

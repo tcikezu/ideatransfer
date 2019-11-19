@@ -25,9 +25,8 @@ def probInteraction(community):
 
 def ideaUpdate(ideaTransfer, community):
     product = np.tensordot(ideaTransfer, community.ideaDistribution, axes=1)
-    #product = product*(np.random.random(product.shape)<=0.5)
-    return normalizeDistribution(product)
-    #return softMaxDistribution(product)
+    #product = product*(np.random.random(self.numberMembers, self.numberIdeas, self.domainSize)<=0.5)
+    return product
 
 # deterministically merge everyone's ideas with everybody else, each time step.
 # For this, we create the indicator, @param agreementMatrix - allThresholds > 0 -- and let this value
@@ -35,10 +34,11 @@ def ideaUpdate(ideaTransfer, community):
 # From this we also subtract diagonal agreements because we don't want people to reinforce their own ideas
 # every time step.
 def deterministicMerge(community, gamma, t):
-    #community.ideaDistribution = softMaxDistribution((1-gamma)*community.ideaDistribution + gamma*ideaUpdate(probAgreement(community), community))
     ideaTransfer = probAgreement(community)
+    #community.ideaDistribution = softMaxDistribution((1-gamma)*community.ideaDistribution + gamma*ideaUpdate(probAgreement(community), community))
     community.ideaDistribution = normalizeDistribution((1-gamma)*community.ideaDistribution + gamma*ideaUpdate(ideaTransfer, community))
-    community.resampleIdeas()
+    if t%10 == 0:
+        community.resampleIdeas()
     positionUpdate(community, ideaTransfer)
 
 # Probabilistically merge everyone's ideas with a subset of the community each time step.
@@ -48,14 +48,15 @@ def deterministicMerge(community, gamma, t):
 # 0 and standard deviation equal to 2/3 * positionBound. (Quick calculation tells me that 2/3 * positionBound
 # is in fact the average distance between two points inside the square bounded by (+/- positionBound, +/- positionBound).)
 # So on average ... a member will interact with somewhere less than half of all the other members. 
-def probabilisticMerge(community, gamma, t):
+def probabilisticMerge(community, t):
     ideaTransfer = probAgreement(community) * probInteraction(community)
-    community.ideaDistribution = normalizeDistribution((1 - gamma)*community.ideaDistribution + gamma*ideaUpdate(ideaTransfer, community))
+    community.ideaDistribution = normalizeDistribution((1 - community.allGamma)*community.ideaDistribution + community.allGamma * ideaUpdate(ideaTransfer, community))
+    #community.ideaDistribution = softMaxDistribution((1 - community.allGamma) * community.ideaDistribution + community.allGamma * ideaUpdate(ideaTransfer, community), 2)
 
     # originally I needed to undersample, so that people could see same ideas multiple times
     # to converge better. I am unsure if I need this. 
-    #if t%5 == 0: 
-    community.resampleIdeas()
+    if t%10 == 0:
+        community.resampleIdeas()
     positionUpdate(community, ideaTransfer)
 
 def positionUpdate(community,ideaTransfer):
@@ -79,7 +80,7 @@ def positionUpdate(community,ideaTransfer):
     # to make chemicals react -- people need to find each other to interact
     deltaAttract = (ideaTransfer>0).reshape(community.numberMembers,community.numberMembers,1)*community.differenceMatrix
     deltaRepel = (ideaTransfer < 0).reshape(community.numberMembers,community.numberMembers,1)*community.differenceMatrix
-    community.allPositions += ((2*np.random.rand(community.numberMembers,2)-1) + deltaAttract.sum(axis=1) - deltaRepel.sum(axis=1)) * community.allVelocities.reshape(community.numberMembers,1)
+    community.allPositions += ((2*np.random.rand(community.numberMembers,2)-1) + deltaAttract.sum(axis=1) - deltaRepel.sum(axis=1)) * community.allVelocities
 
     community.distanceMatrix = community.createDistanceMatrix()
     community.differenceMatrix = community.createDifferenceMatrix()
