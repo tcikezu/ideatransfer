@@ -1,7 +1,7 @@
 """ transfer.py
 -----------------------
 Branch: distExchange
-Date: 11/15/2019
+Date: 11/19/2019
 
 This file implements the idea transfer class. The methods exported accept a
 community object, and modifies it. Thus a call of idea transfer updates the
@@ -14,7 +14,7 @@ from util import *
 # function probAgreement:
 # returns an n x n matrix that calculates the agreement between any pair of members.
 def probAgreement(community):
-    return 1*(community.agreementMatrix > community.allThresholds) - 1*(community.agreementMatrix < -community.allThresholds) - np.eye(community.numberMembers)
+    return community.agreementMatrix * (1*(community.agreementMatrix > community.allThresholds) + 1*(community.agreementMatrix < -community.allThresholds) - 1*np.eye(community.numberMembers))
 
 # function probInteraction: 
 # returns (A > r) * (g > rand), which is an n x n matrix whose columns correspond to member_i, interacting with all other members j. 
@@ -59,7 +59,7 @@ def probabilisticMerge(community, t):
         community.resampleIdeas()
     positionUpdate(community, ideaTransfer)
 
-def positionUpdate(community,ideaTransfer):
+def positionUpdate(community, ideaTransfer):
     """ few ideas could work here:
     1: update position to that of best idea + noise
     2: update position to that of worst idea + noise
@@ -77,10 +77,13 @@ def positionUpdate(community,ideaTransfer):
     # stay in roughly the same space as where they began -- ie, in the unit square.
     # we'll see if that is truly the case. 
     # the reason why a diffusion term is needed, is kinda similar to why we need heat 
-    # to make chemicals react -- people need to find each other to interact
-    deltaAttract = (ideaTransfer>0).reshape(community.numberMembers,community.numberMembers,1)*community.differenceMatrix
-    deltaRepel = (ideaTransfer < 0).reshape(community.numberMembers,community.numberMembers,1)*community.differenceMatrix
-    community.allPositions += ((2*np.random.rand(community.numberMembers,2)-1) + deltaAttract.sum(axis=1) - deltaRepel.sum(axis=1)) * community.allVelocities
+    # to make chemicals react -- people need some thermal energy to find each before they can interact
+    #deltaAttract = (ideaTransfer>0).reshape(community.numberMembers,community.numberMembers,1)*community.differenceMatrix
+    #deltaRepel = (ideaTransfer < 0).reshape(community.numberMembers,community.numberMembers,1)*community.differenceMatrix
+        
+    deltaInteraction = ideaTransfer.reshape(community.numberMembers, community.numberMembers, 1) * community.differenceMatrix
+    community.allPositions += ((2*np.random.rand(community.numberMembers,2) -1) + deltaInteraction.sum(axis=1))*community.allVelocities
+    #community.allPositions += ((2*np.random.rand(community.numberMembers,2)-1) + deltaAttract.sum(axis=1) - deltaRepel.sum(axis=1)) * community.allVelocities
 
     community.distanceMatrix = community.createDistanceMatrix()
     community.differenceMatrix = community.createDifferenceMatrix()
