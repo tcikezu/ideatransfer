@@ -15,7 +15,7 @@ and also fn, a string file-name which defaults to date and time."""
 def simulate(c=None, gamma = 0.005, T = 80,fn=date_time):
     # seems like the same community is used again and again if I do not specify None case below.
     if c is None:
-        c = community(300,3)
+        c = community(100,3,10)
     fps = 40
 
     # Data to store c.allIdeas, to then make animation
