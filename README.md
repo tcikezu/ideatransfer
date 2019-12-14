@@ -1,15 +1,23 @@
-# ideatransfer
-To do: 
-Position subplots
+# idea transfer 
 
-Need to implement an RL agent.
+To run simulations, simply run 'python3 simulation.py'
+However, the following are some dependencies:
+- python3.7
+- ipython3
+- pickle
+- numpy
+- matplotlib
+- mpl_toolkits
+- datetime
+- random
+- collections
 
-Read up on 
-- information maximimzation
-- social media / text analysis, how language use changes over time (See No Country for Old Members.)
--- idea: user life cycle. begin posting, eventually leave / stop. identify change in linguistic feature over time
--- at first a learning phase, in which user adopts language of community; a conservative phase where they stop changing, and community passes them by
--- preferential attachment (how model rows) -- > leads to power law of weights and can explain six degrees of separation
-- formation of power laws in social networks / graphs
-- Duncan Watts
-- Albert-László Barabási
+In addition to this, running all the code under jupyter notebooks is recommended. 
+
+After running simulation.py, several variables are saved with pickle, to form a pkl file.
+(Name depends on the value for variable 'fn', set in simulation.py)
+This pkl file, is can then be used in a variety of contexts -- see for e.g., plotStuff.ipynb
+
+Within plotStuff.ipynb, one can generate gifs of the agents attempting to convince the entire community of their idea. See the gifs folder for example gifs. 
+
+
