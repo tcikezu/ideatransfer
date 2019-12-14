@@ -5,9 +5,7 @@ import collections, random
 # An algorithm that solves an MDP (i.e., computes the optimal
 # policy).
 class MDPAlgorithm:
-    # Set:
-    # - self.pi: optimal policy (mapping from state to action)
-    # - self.V: values (mapping from state to best values)
+    # Set: # - self.pi: optimal policy (mapping from state to action) # - self.V: values (mapping from state to best values)
     def solve(self, mdp): raise NotImplementedError("Override me")
 
 ############################################################
