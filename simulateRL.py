@@ -1,6 +1,6 @@
 from community import community
 from transfer import transfer
-import mdp, util, utilRL, random
+import mdp, util, utilRL, copy, time, random, pickle
 import numpy as np
 ######################################################################
 
@@ -31,12 +31,16 @@ def simulate(rl, numTrials=1, maxIterations=100, verbose=False,sort=False):
         # Form a brand new agent  
         agentMDP = mdp.agentMDP(c)
         agentMDP.tau = rl.tau
+        agentMDP.T = maxIterations
         
         # Update QLearning community to new community
         rl.c = c
         rl.index = agentMDP.index
         
         Transfer = transfer(c)
+
+        #for t in range(200):
+        #    Transfer.probabilisticMerge()
 
         state = agentMDP.startState()
         sequence = [state]
@@ -70,7 +74,7 @@ def simulate(rl, numTrials=1, maxIterations=100, verbose=False,sort=False):
             sequence.append(reward)
             sequence.append(newState)
 
-            rl.incorporateFeedback(state, action, reward, newState)
+            #rl.incorporateFeedback(state, action, reward, newState)
             totalReward += totalDiscount * reward
             totalDiscount *= agentMDP.discount()
             state = newState

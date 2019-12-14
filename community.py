@@ -15,9 +15,9 @@ from collections import defaultdict
 
 ######################################################################
 # Default parameter values
-DEFAULT_COMMUNITY_SIZE = 100
 DEFAULT_IDEA_SIZE = 4
 DEFAULT_DOMAIN_SIZE = 10
+DEFAULT_COMMUNITY_SIZE = 100
 
 # Class: Idea
 # -----------------------------------
@@ -68,7 +68,7 @@ class member(idea):
 
         self.position = np.random.uniform(-self.positionBound, self.positionBound, self.positionDimensions)
         self.threshold = np.random.normal(0.5,0.1)
-        self.radius = (np.random.normal(0.4,0.1)**2 + np.random.normal(0.4,0.1)**2)**0.5
+        self.radius = (np.random.normal(0.2,0.1)**2 + np.random.normal(0.2,0.1)**2)**0.5
         self.gregariousness = np.random.normal(0.5,0.1)
         self.velocity = np.random.lognormal(-3,0.5)*self.positionBound
         self.gamma = np.random.lognormal(-2.5, 0.1)

@@ -15,7 +15,7 @@ def plotCommunity(c, data, fps=4, fn=date_time):
     [dataX, dataY, dataZ, posX, posY, ideaDist] = data
     
     T = len(dataX)
-    
+
     # Plot results
     fig = plt.figure(figsize=(10,5))
     ax1 = fig.add_subplot(131,projection='3d')
@@ -31,7 +31,7 @@ def plotCommunity(c, data, fps=4, fn=date_time):
     ax2.scatter(posX[0][0], posY[0][0],s=1000*c.allRadii[0]**2,c='r',alpha=0.2)
     
     ax3 = fig.add_subplot(133)
-#     ifrm = 0
+    ifrm = 0
     squareLoss = -1*np.sum(((dataX[ifrm]- dataX[ifrm][0])**2 + (dataY[ifrm] - dataY[ifrm][0])**2 + (dataZ[ifrm] - dataZ[ifrm][0])**2))
 #     ax3.scatter(0, squareLoss)
 #     ax3.scatter(c.domain,ideaDist[0])

@@ -136,8 +136,7 @@ class agentMDP(utilRL.MDP):
         #    return results
         #if action == 'interact':
         #    for i in range(len(state)):
-        #        c_copy = copy.deepcopy(self.c)
-        #        Transfer = transfer(c_copy)
+        #        c_copy = copy.deepcopy(self.c) #        Transfer = transfer(c_copy)
         #        c_copy.ideaDistribution[i] = (1 - c_copy.allGamma[i]) * c_copy.ideaDistribution[i] + c_copy.allGamma[i]*c_copy.ideaDistribution[self.index]
         #        c_copy.ideaDistribution = util.normalizeDistribution(c_copy.ideaDistribution)
         #        results.append((self.stepForward(c_copy, Transfer), 1.0/len(state), self.getReward(c_copy)))
@@ -151,7 +150,7 @@ class agentMDP(utilRL.MDP):
         return 1
 
 class QLearningAlgorithm(utilRL.RLAlgorithm):
-    def __init__(self, index, tau, community, actions, discount, featureExtractor, explorationProb=0.2):
+    def __init__(self, index, tau, community, actions, discount, featureExtractor, explorationProb=0.2, alpha=1.0):
         self.index = index
         self.tau = tau
         self.c = community
@@ -161,6 +160,7 @@ class QLearningAlgorithm(utilRL.RLAlgorithm):
         self.explorationProb = explorationProb
         self.weights = defaultdict(float)
         self.numIters = 0
+        self.alpha = alpha
 
     def getQ(self, state, action):
         score = 0
@@ -170,13 +170,14 @@ class QLearningAlgorithm(utilRL.RLAlgorithm):
 
     def getAction(self, state):
         self.numIters += 1
-        if random.random() < self.explorationProb:
+        if random.random() < (self.explorationProb / math.sqrt(self.numIters)):
             return random.choice(self.actions(state))
         else:
             return max((self.getQ(state, action), action) for action in self.actions(state))[1]
 
     # Call this function to get the step size to update the weights:
     def getStepSize(self):
+	    #return self.alpha
         return 1.0 / math.sqrt(self.numIters)
 
     def incorporateFeedback(self, state, action, reward, newState):
@@ -192,17 +193,17 @@ def communityFeatureExtractor(agentIndex, community, state, action):
         ######################### Featurize state ############################
         # number of neighbors
         numberNeighbors = len(neighbors)
+        numberSampled = len(sampledMembers)
 
         # average agreement
-        averageAgreementNeighbors = round(sum([np.round(community.agreementMatrix[agentIndex][member[1]],1) for member in neighbors]),1)
-        averageAgreementSampled = round(sum([np.round(community.agreementMatrix[agentIndex][member[1]],1) for member in sampledMembers]),1)
+        averageAgreementNeighbors = round(sum([np.round(community.agreementMatrix[agentIndex][member[1]],1) for member in neighbors])/(numberNeighbors + 0.001),1)
+        #averageAgreementSampled = round(sum([np.round(community.agreementMatrix[agentIndex][member[1]],1) for member in sampledMembers])/(numberSampled + 0.001),1)
         
         # distances from sampled members
-        # rounding to the nearest digit -- keep things simple
-        sampleDistances = [np.round(community.distanceMatrix[agentIndex][member[1]]) for member in sampledMembers]
+        #sampleDistances = [np.round(community.distanceMatrix[agentIndex][member[1]],1) for member in sampledMembers]
         
         # agreements of sampled member
-        sampleAgreements = [np.round(community.agreementMatrix[agentIndex][member[1]],1) for member in sampledMembers]
+        #sampleAgreements = [np.round(community.agreementMatrix[agentIndex][member[1]],1) for member in sampledMembers]
         
         ######################## Featurize Action ############################
         if action[0] == 'move': 
@@ -210,27 +211,38 @@ def communityFeatureExtractor(agentIndex, community, state, action):
             rad = np.round(community.allRadii[action[1]], 1)
 
             # gregariousness of sample member
-            # gre = np.round(community.allGregariousness[action[1],1)
+            gre = np.round(community.allGregariousness[action[1]],1)
+
+            # rad*gregariousness of sample member
+            # radgre = np.round(community.allGregariousness[action[1]] * community.allRadii[action[1]], 1)
 
             # agreement of sample member
             ag = np.round(community.agreementMatrix[agentIndex][action[1]],1)
         
             # distance of sample member to agent
             # again, I am rounding this to nearest digit
-            dist = np.round(community.agreementMatrix[agentIndex][action[1]])
-           
+            dist = np.round(community.agreementMatrix[agentIndex][action[1]],1)
+
             # simplest feature in my opinion
-            feature.append(((action[0], averageAgreementNeighbors, ag, dist), 1))
-            #feature.append(((action[0], averageAgreementNeighbors, averageAgreementSampled, \
-                #frozenset(sampleDistances), frozenset(sampleAgreements), rad, ag, dist), 1))
+            #feature.append(((action[0], averageAgreementNeighbors, ag, dist, rad), 1))
+
+            # radius wasn't doing any feature learning -- now trying rad with gre
+            #feature.append(((action[0], averageAgreementNeighbors, ag, dist, rad, gre), 1))
+            #feature.append(((action[0], averageAgreementNeighbors, numberNeighbors, averageAgreementSampled, frozenset(sampleDistances), frozenset(sampleAgreements), ag, dist, rad, gre), 1))
+            feature.append(((action[0], averageAgreementNeighbors, numberNeighbors, ag, dist, rad, gre), 1))
+            #feature.append(((action[0], averageAgreementNeighbors, ag, dist, rad, gre), 1))
+            #feature.append(((action[0], averageAgreementSampled, ag, dist, rad, gre), 1))
+            #feature.append(((action[0], frozenset(sampleDistances), ag, dist, rad, gre), 1))
+            #feature.append(((action[0], frozenset(sampleAgreements), ag, dist, rad, gre), 1))
         else:
-            feature.append(((action[0], averageAgreementNeighbors), 1))
-            #feature.append(((action[0], averageAgreementNeighbors, averageAgreementSampled, \
-                #frozenset(sampleDistances), frozenset(sampleAgreements)), 1))
-       
-        # Regardless of what the sample population looks like. 
-        feature.append(((numberNeighbors, action[0]), 1))
- 
+            feature.append(((action[0], averageAgreementNeighbors, numberNeighbors), 1))
+            #feature.append(((action[0], averageAgreementNeighbors, numberNeighbors, averageAgreementSampled), 1))
+            #feature.append(((action[0], frozenset(sampleDistances), frozenset(sampleAgreements)), 1))
+            #feature.append(((action[0], numberNeighbors), 1))
+            #feature.append(((action[0], averageAgreementNeighbors), 1))
+            #feature.append(((action[0], averageAgreementSampled), 1))
+            #feature.append(((action[0], frozenset(sampleDistances)), 1))
+            #feature.append(((action[0], frozenset(sampleAgreements)), 1))
         return feature
     else:
         return []
