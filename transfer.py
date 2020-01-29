@@ -1,9 +1,9 @@
-""" transfer.py
+"""
+transfer.py
 =================
 Branch: RL Agent
 
-This file implements the idea transfer class. The methods exported accept a
-community object, and modifies it. 
+This file implements the idea transfer class. The methods exported accept a community object, and modifies it. 
 
 Something worth considering is modifying all previous versions of transfer.py to be classes and not modules? For backwards-compatibility reasons. 
 
@@ -11,7 +11,6 @@ Something worth considering is modifying all previous versions of transfer.py to
 
 import util
 import numpy as np
-##########################################################################
 
 class transfer():
     def __init__(self, community):

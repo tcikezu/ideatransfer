@@ -1,4 +1,5 @@
-""" community.py
+"""
+community.py
 ==============================
 Implementations of community, member, and idea classes.
 

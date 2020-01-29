@@ -53,4 +53,3 @@ html_static_path = ['_static']
 
 # Explicitly assign the master document for viewing on read-the-docs
 master_doc = 'index'
-
