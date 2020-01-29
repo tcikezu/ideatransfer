@@ -3,9 +3,6 @@ Welcome to ideatransfer's documentation!
 .. automodule:: transfer
     :members:
 
-.. automodule:: util
-    :members:
-
 .. automodule:: mdp
     :members:
 
