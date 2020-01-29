@@ -1,6 +1,6 @@
 """
-File: mdp.py
--------------------
+mdp.py
+=====================
 MDP for an agent that is trying to spread its beliefs to the rest of the members of the community. The environment is the community, its members, and the state will comprise the members' beliefs and position. The reward is the community agreement with the member. The set of actions is twofold -- an action comprises a movement in some direction, and also an interaction with some subset of the community.
 """
 
@@ -15,14 +15,12 @@ from datetime import datetime
 date_time = datetime.now().strftime("%m_%d_%Y_%H:%M:%S")
 ######################################################################
 
-# Class : Agent MDP
-# --------------------
-# A MDP representing an agent ... (how to incorporate 2+ agents? how to ensure that the community is the same for both agents?)
-
-# Plan : there will be an instance of community the agent will take from.
-
 
 class agentMDP(utilRL.MDP):
+    """A MDP representing an agent."""
+    # A MDP representing an agent ... (how to incorporate 2+ agents? how to ensure that the community is the same for both agents?)
+    # Plan : there will be an instance of community the agent will take from.
+
     # I suppose that if I let index be a setting here, thne I can allow multiple
     # agents to be a part of the same community. Still need to address rest of the code
     # that assumes agent to be member 0
@@ -48,13 +46,12 @@ class agentMDP(utilRL.MDP):
         self.tau = 10 # number of time steps we let the community run between each step of agent.
         self.sampleSize = sampleSize
 
-    # function : Observe Community --- state definition
-    # ------------------------------
-    # This function retrieves a list of member tuples: (relative position, member index).
-    # Some # of members is sampled randomly from community.
-    # The rest are all neighbors to the agent. 
-    # Note that positions and agreement values are rounded to nearest tenth.
     def observeCommunity(self, community = None):
+        """This function retrieves a list of member tuples: (relative position,
+        member index). Some number of members is sampled randomly from
+        community. The rest are all neighbors to the agent. Note that positions
+        and agreement values are rounded to nearest tenth.
+        """
         if community is None:
             community = self.c
 
@@ -68,29 +65,29 @@ class agentMDP(utilRL.MDP):
         
         return tuple([neighborState, sampleState])
 
-    # function : Get Reward
-    # ---------------------
-    # Attempt one: reward is given at the end of an episode, and is the sum
-    # of all agreements to agent.
-    # Attempt two: reward is -1*(sum of squared distances in idea space)
-    # Awarded *every* step? 
     def getReward(self, community = None):
+        """ Attempt one : reward is given at the end of an episode, and is the
+        sum of all agreements to agent. 
+        Attempt two : reward is -1 * (sum of squared distances in idea space)
+        awarded *every* step?
+        """
         if community is None:
             community = self.c
         return np.sum(community.agreementMatrix[self.index])*(self.T < 1) # self.T decreased before call
         
         #return np.sum(community.ideaDistanceMatrix[self.index])
 
-    # function : start state
-    # --------------------------
-    # state = ((all neighbors), (randomly sampled members))
     def startState(self):
+        """Returns the state that the agent begins in."""
         return self.observeCommunity()
 
-    # Function : actions
-    # -------------------
-    # state: ((neighbors), (randomly sampled))
     def actions(self, state):
+        """Defines a set of actions given the current state.
+
+        Parameters
+        --------------
+        state : list
+        """
         neighbors = state[0]
         sampleMembers = state[1]
 
@@ -99,10 +96,15 @@ class agentMDP(utilRL.MDP):
             return actions
         return actions + [tuple(['interact'])]
 
-    # Function: (Succ)essor and (Prob)ability Reward
-    # ----------------------------------------------
-    # Given a state action (s,a) pair, return a list of (Succ(s,a), T(s,a,Succ(s,a)), R(s,a,Succ(s,a)) tuples.
     def succAndProbReward(self, state, action):
+        """Given a state action (s,a) pair, return a list of (Succ(s,a),
+        T(s,a,Succ(s,a)), R(s,a,Succ(s,a)) tuples.
+
+        Parameters
+        ----------------
+        state : list
+        action : string
+        """
         # Something to note is that i could udpate an internal gregariousness counter -- see how many
         # times it chose to move vs interact. but maybe i can see that in post
         # Reached end state

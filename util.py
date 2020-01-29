@@ -1,5 +1,5 @@
-""" file: util.py
--------------------
+""" util.py
+================
 Implementations of some methods that (may) have some use in the rest of the modules.
 
 """

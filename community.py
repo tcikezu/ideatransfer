@@ -1,5 +1,5 @@
-""" File: community.py
-------------------------------------
+""" community.py
+==============================
 Implementations of community, member, and idea classes.
 
 A community has members, each of which has ideas.
@@ -19,11 +19,10 @@ DEFAULT_IDEA_SIZE = 4
 DEFAULT_DOMAIN_SIZE = 10
 DEFAULT_COMMUNITY_SIZE = 100
 
-# Class: Idea
-# -----------------------------------
-# This class implements idea objects, things that represent some opinion about the environment
-# or world.
 class idea():
+    """ This class implements idea objects, things that reprsent some opinion
+    about the environment or world.
+    """
     def __init__(self, numberIdeas = None, domainSize = None):
         if numberIdeas is None:
             self.numberIdeas = DEFAULT_IDEA_SIZE
@@ -51,16 +50,23 @@ class idea():
 
 ######################################################################################
 
-# Class:  Member
-# An instance of member is something that has position, ideas, and threshold. By
-# having ideas, the member is something that has opinions, and we can measure its
-# agreement with other members with the idea - inherited agreement method.
-# In addition, members have parameters: gregariousness, radius, velocity, and gamma.
-# Gregariousness: rate of interaction with other members
-# Radius: limit to physical distane of other members, a member can interact with
-# velocity: average velocity with which member moves in physical space. 0 < velocity < 1
-# gamma: controls rate of adding new ideas / rate of forgetting old ideas, 0 < gamma < 1
 class member(idea):
+    """An instance of member is something that has position, ideas, and
+    threshold. By having ideas, the member is something that has opinions, and
+    we can measure its agreement with other members with the idea - inherited
+    agreement method.
+
+    Attributes
+    --------------
+    radius : float
+        Physical reach of member (to other neighboring members).
+    velocity : float
+        Member's speed of travel (in position space).
+    gamma : float
+        Rate of idea forgetting, between 0 and 1.
+    gregariousness: float
+        Rate of interaction with other neighbor members.
+    """
     def __init__(self, numberIdeas=None, domainSize = None):
         super().__init__(numberIdeas, domainSize)
         self.positionBound = 1
@@ -74,11 +80,12 @@ class member(idea):
         self.gamma = np.random.lognormal(-2.5, 0.1)
 
 #######################################################################################
-# Class: Community
-# An instance of this class creates a set of members who are close in position, and can
-# interact by exchanging ideas. The idea exchange is actually implemented in transfer.py.
-# Here we implement the storing of all member parameters (e.g. thresholds).
 class community():
+    """An instance of this class creates a set of members who are close in
+    position, and can interact by exchanging ideas. The idea exchange is
+    actually implemented in transfer.py. Here we implement the storing of all member parameters (e.g. thresholds).
+    """
+
     def __init__(self, numberMembers = None, numberIdeas = None, domainSize = None):
         if numberMembers is None:
             self.numberMembers = DEFAULT_COMMUNITY_SIZE
@@ -164,13 +171,16 @@ class community():
     def createIdeaDistanceMatrix(self):
         return util.distanceMatrix(self.allIdeas)
 
-    # function: Resample Ideas
-    # --------------------------
-    # Some random subset of members resample their ideas from their underlying
-    # idea distributions.
-    # The sampling frequency ... may be some function of gregariousness, threshold.
-    # Or it may be random.
     def resampleIdeas(self, proportion):
+        """A random subset of members resample their ideas from their
+        underlying idea distributions. The sampling frequency may be some
+        function of gregariousness or threshold, or it may be random.
+        
+        Parameters
+        ---------------
+        proportion : float
+            The fraction of community members who resample their ideas.
+        """
         sampleSize = int(proportion * self.numberMembers)
         sampleMembers = np.random.choice(np.arange(self.numberMembers), size=sampleSize, replace=False)
 #         self.allIdeas[sampleMembers] = np.random.normal(self.domain[util.resampleDistribution(self.ideaDistribution, sampleMembers)],1 - self.allThresholds[sampleMembers, np.newaxis].reshape(sampleSize, 1))

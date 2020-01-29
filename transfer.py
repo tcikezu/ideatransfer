@@ -1,5 +1,5 @@
 """ transfer.py
------------------------
+=================
 Branch: RL Agent
 
 This file implements the idea transfer class. The methods exported accept a
@@ -17,21 +17,20 @@ class transfer():
     def __init__(self, community):
         self.c = community
    
-    # function Conditonal Agreement:
-    # ---------------------------
-    # returns an n x n matrix that calculates the agreement between any pair of members, 
-    # with threshold that's member-specific. (specifically, |A_{ij}| > threshold_i, for 
-    # all members i.)
     def conditionalAgreement(self):
+        """returns an n x n matrix that calculates the agreement between
+        any pair of members, with threshold that's member-specific.
+        (specifically, |A_{ij}| > threshold_i, for all members i.)
+        """
+
         return self.c.agreementMatrix*(1*(self.c.agreementMatrix > self.c.allThresholds) + 1*(self.c.agreementMatrix < -self.c.allThresholds) - 1*np.eye(self.c.numberMembers))
 
-    # function probInteraction: 
-    # ---------------------------
-    # returns (D > r) * (g > rand), which is an n x n matrix whose columns 
-    # correspond to member_i, interacting with all other members j.
-    # More specifically, (D_{ij} > radius_{i}) * (gregariousness_i > np.random.rand, for
-    # each member i.) 
     def probInteraction(self):
+        """returns (D > r) * (g > rand), which is an n x n matrix whose columsn
+        correspond to member_i, interacting with all members j. More
+        specifically, (D_{ij} > radius_{i}) * (gregariousness_i >
+        np.random.rand, for each member i.)
+        """
         np.random.seed()
         return (self.c.distanceMatrix < self.c.allRadii) * (self.c.allGregariousness >  np.random.random(self.c.numberMembers))
 
@@ -40,15 +39,19 @@ class transfer():
         #product = product*(np.random.random(self.numberMembers, self.numberIdeas, self.domainSize)<=0.5)
         return product
 
-    # deterministically merge everyone's ideas with everybody else, each time step.
     def deterministicMerge(self):
+        """Deterministically merge everyone's ideas with everybody else's, each
+        time step.
+        """
         ideaTransfer = self.conditionalAgreement()
         self.c.ideaDistribution = util.normalizeDistribution((1-gamma)*self.c.ideaDistribution + self.c.allGamma*self.ideaUpdate(ideaTransfer))
         self.c.resampleIdeas(0.1)
         #self.positionUpdate(ideaTransfer)
 
-    # Probabilistically merge everyone's ideas with a subset of the community each time step.
     def probabilisticMerge(self):
+        """ Probabilistically merge everyone's ideas with a subset of the
+        community each time step.
+        """
         ideaTransfer = self.conditionalAgreement() * self.probInteraction()
         self.c.ideaDistribution = util.normalizeDistribution((1 - self.c.allGamma)*self.c.ideaDistribution + self.c.allGamma * self.ideaUpdate(ideaTransfer))
 
