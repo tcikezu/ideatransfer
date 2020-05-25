@@ -12,8 +12,11 @@
 #
 import os
 import sys
+sys.path.insert(0, os.path.abspath('../../rlmodel'))
+sys.path.insert(0, os.path.abspath('../../community_dynamics'))
+sys.path.insert(0, os.path.abspath('../../simulation_scripts'))
+sys.path.insert(0, os.path.abspath('../../pretrained_models'))
 sys.path.insert(0, os.path.abspath('../../'))
-
 
 # -- Project information -----------------------------------------------------
 
