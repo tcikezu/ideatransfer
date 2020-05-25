@@ -1,5 +1,5 @@
 #!/bin/bash
-conda env update --name durakula --file env.yml
+conda env update --name ideatransfer --file env.yml
 
 # Note - the very first command you run to create the environment file is below.
 # Take care that you install while specifying version number .... 
