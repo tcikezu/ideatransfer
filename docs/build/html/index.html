@@ -1,0 +1,264 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Welcome to ideatransfer’s documentation! &#8212; ideatransfer  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-transfer">
+<span id="welcome-to-ideatransfer-s-documentation"></span><h1>Welcome to ideatransfer’s documentation!<a class="headerlink" href="#module-transfer" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="transfer-py">
+<h2>transfer.py<a class="headerlink" href="#transfer-py" title="Permalink to this headline">¶</a></h2>
+<p>Branch: RL Agent</p>
+<p>This file implements the idea transfer class. The methods exported accept a community object, and modifies it.</p>
+<p>Something worth considering is modifying all previous versions of transfer.py to be classes and not modules? For backwards-compatibility reasons.</p>
+</div>
+<span class="target" id="module-mdp"></span><div class="section" id="mdp-py">
+<h2>mdp.py<a class="headerlink" href="#mdp-py" title="Permalink to this headline">¶</a></h2>
+<p>MDP for an agent that is trying to spread its beliefs to the rest of the members of the community. The environment is the community, its members, and the state will comprise the members’ beliefs and position. The reward is the community agreement with the member. The set of actions is twofold – an action comprises a movement in some direction, and also an interaction with some subset of the community.</p>
+<dl class="py class">
+<dt id="mdp.agentMDP">
+<em class="property">class </em><code class="sig-prename descclassname">mdp.</code><code class="sig-name descname">agentMDP</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">community</span></em>, <em class="sig-param"><span class="n">index</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">sampleSize</span><span class="o">=</span><span class="default_value">10</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdp.agentMDP" title="Permalink to this definition">¶</a></dt>
+<dd><p>A MDP representing an agent.</p>
+<dl class="py method">
+<dt id="mdp.agentMDP.actions">
+<code class="sig-name descname">actions</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">state</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdp.agentMDP.actions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines a set of actions given the current state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<em>list</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mdp.agentMDP.getReward">
+<code class="sig-name descname">getReward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">community</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdp.agentMDP.getReward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempt one : reward is given at the end of an episode, and is the
+sum of all agreements to agent.
+Attempt two : reward is -1 * (sum of squared distances in idea space)
+awarded <em>every</em> step?</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mdp.agentMDP.observeCommunity">
+<code class="sig-name descname">observeCommunity</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">community</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdp.agentMDP.observeCommunity" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function retrieves a list of member tuples: (relative position,
+member index). Some number of members is sampled randomly from
+community. The rest are all neighbors to the agent. Note that positions
+and agreement values are rounded to nearest tenth.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mdp.agentMDP.startState">
+<code class="sig-name descname">startState</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mdp.agentMDP.startState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the state that the agent begins in.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mdp.agentMDP.succAndProbReward">
+<code class="sig-name descname">succAndProbReward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">state</span></em>, <em class="sig-param"><span class="n">action</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdp.agentMDP.succAndProbReward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a state action (s,a) pair, return a list of (Succ(s,a),
+T(s,a,Succ(s,a)), R(s,a,Succ(s,a)) tuples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state</strong> (<em>list</em>) – </p></li>
+<li><p><strong>action</strong> (<em>string</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span class="target" id="module-community"></span><div class="section" id="community-py">
+<h2>community.py<a class="headerlink" href="#community-py" title="Permalink to this headline">¶</a></h2>
+<p>Implementations of community, member, and idea classes.</p>
+<p>A community has members, each of which has ideas.</p>
+<p>The member interaction is modeled as stochastic dependent on positions in some real space.
+Hence, no adjacency or graph network is being modeled here.</p>
+<dl class="py class">
+<dt id="community.community">
+<em class="property">class </em><code class="sig-prename descclassname">community.</code><code class="sig-name descname">community</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">numberMembers</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">numberIdeas</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">domainSize</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#community.community" title="Permalink to this definition">¶</a></dt>
+<dd><p>An instance of this class creates a set of members who are close in
+position, and can interact by exchanging ideas. The idea exchange is
+actually implemented in transfer.py. Here we implement the storing of all member parameters (e.g. thresholds).</p>
+<dl class="py method">
+<dt id="community.community.resampleIdeas">
+<code class="sig-name descname">resampleIdeas</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">proportion</span></em><span class="sig-paren">)</span><a class="headerlink" href="#community.community.resampleIdeas" title="Permalink to this definition">¶</a></dt>
+<dd><p>A random subset of members resample their ideas from their
+underlying idea distributions. The sampling frequency may be some
+function of gregariousness or threshold, or it may be random.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>proportion</strong> (<em>float</em>) – The fraction of community members who resample their ideas.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="community.idea">
+<em class="property">class </em><code class="sig-prename descclassname">community.</code><code class="sig-name descname">idea</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">numberIdeas</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">domainSize</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#community.idea" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class implements idea objects, things that reprsent some opinion
+about the environment or world.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="community.member">
+<em class="property">class </em><code class="sig-prename descclassname">community.</code><code class="sig-name descname">member</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">numberIdeas</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">domainSize</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#community.member" title="Permalink to this definition">¶</a></dt>
+<dd><p>An instance of member is something that has position, ideas, and
+threshold. By having ideas, the member is something that has opinions, and
+we can measure its agreement with other members with the idea - inherited
+agreement method.</p>
+<dl class="py attribute">
+<dt id="community.member.radius">
+<code class="sig-name descname">radius</code><a class="headerlink" href="#community.member.radius" title="Permalink to this definition">¶</a></dt>
+<dd><p>Physical reach of member (to other neighboring members).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="community.member.velocity">
+<code class="sig-name descname">velocity</code><a class="headerlink" href="#community.member.velocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Member’s speed of travel (in position space).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="community.member.gamma">
+<code class="sig-name descname">gamma</code><a class="headerlink" href="#community.member.gamma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rate of idea forgetting, between 0 and 1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="community.member.gregariousness">
+<code class="sig-name descname">gregariousness</code><a class="headerlink" href="#community.member.gregariousness" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rate of interaction with other neighbor members.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">ideatransfer</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Clark Ikezu.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
