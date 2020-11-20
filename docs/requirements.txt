@@ -1,5 +1,0 @@
-#
-###### Read the Docs requirements file ######
-#
-numpy >= 1.18.1
-
